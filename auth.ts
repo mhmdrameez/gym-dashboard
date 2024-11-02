@@ -50,11 +50,11 @@ export const { auth, signIn, signOut } = NextAuth({
           }
         } catch (error) {
           // Handle errors with more detailed logging
-          if (error.response) {
-            console.log('Failed to authenticate with API', error.response.data);
-          } else {
-            console.error('Error during API authentication:', error.message);
-          }
+          // if (error.response) {
+          //   console.log('Failed to authenticate with API', error.response.data);
+          // } else {
+          //   console.error('Error during API authentication:', error.message);
+          // }
           return null;
         }
       },
