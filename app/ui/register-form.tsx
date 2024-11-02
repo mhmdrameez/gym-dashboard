@@ -16,6 +16,8 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { useRouter } from "next/navigation"; // Ensure correct import
 import Link from 'next/link';
+import { FaEye, FaEyeSlash } from 'react-icons/fa'; // Importing eye icons from react-icons
+
 
 // Define Zod schema for form validation
 const formSchema = z.object({
@@ -41,6 +43,19 @@ export default function RegistrationForm() {
   const [successMessage, setSuccessMessage] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
+
+
+    // Function to toggle password visibility
+    const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword);
+      };
+    
+      const toggleConfirmPasswordVisibility = () => {
+        setShowConfirmPassword(!showConfirmPassword);
+      };
 
 
   const {
@@ -267,47 +282,72 @@ export default function RegistrationForm() {
             )} */}
           </div>
 
-          {/* Password */}
-          <div>
-            <label className="mb-3 mt-5 block text-xs font-medium text-gray-900" htmlFor="password">
-              Password
-            </label>
-            <div className="relative">
-              <input
-                className={`peer block w-full rounded-md border ${errors.password ? 'border-red-500' : 'border-gray-200'} py-[9px] pl-10 text-sm outline-2 placeholder:text-gray-500`}
-                id="password"
-                type="password"
-                {...register('password', { required: true })}
-                placeholder="Create a password"
-                required
-              />
-              <KeyIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
-            </div>
-            {/* {errors.password && (
-              <p className="mt-1 text-sm text-red-500">{errors.password.message}</p>
-            )} */}
-          </div>
+       {/* Password */}
+      <div>
+        <label className="mb-3 mt-5 block text-xs font-medium text-gray-900" htmlFor="password">
+          Password
+        </label>
+        <div className="relative">
+          <input
+            className={`peer block w-full rounded-md border ${errors.password ? 'border-red-500' : 'border-gray-200'} py-[9px] pl-10 text-sm outline-2 placeholder:text-gray-500`}
+            id="password"
+            type={showPassword ? 'text' : 'password'} // Toggle between text and password
+            {...register('password', { required: true })}
+            placeholder="Create a password"
+            required
+            minLength={6}
+          />
+          <KeyIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+          <button
+            type="button"
+            onClick={togglePasswordVisibility}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-900"
+            aria-label={showPassword ? 'Hide password' : 'Show password'}
+          >
+            {showPassword ? (
+              <FaEyeSlash className="h-5 w-5" /> // Closed eye icon
+            ) : (
+              <FaEye className="h-5 w-5" /> // Open eye icon
+            )}
+          </button>
+        </div>
+        {/* {errors.password && (
+          <p className="mt-1 text-sm text-red-500">{errors.password.message}</p>
+        )} */}
+      </div>
 
-          {/* Confirm Password */}
-          <div>
-            <label className="mb-3 mt-5 block text-xs font-medium text-gray-900" htmlFor="confirm_password">
-              Confirm Password
-            </label>
-            <div className="relative">
-              <input
-                className={`peer block w-full rounded-md border ${errors.confirm_password ? 'border-red-500' : 'border-gray-200'} py-[9px] pl-10 text-sm outline-2 placeholder:text-gray-500`}
-                id="confirm_password"
-                type="password"
-                {...register('confirm_password', { required: true })}
-                placeholder="Confirm your password"
-                required
-              />
-              <KeyIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
-            </div>
-            {/* {errors.confirm_password && (
-              <p className="mt-1 text-sm text-red-500">{errors.confirm_password.message}</p>
-            )} */}
-          </div>
+      {/* Confirm Password */}
+      <div>
+        <label className="mb-3 mt-5 block text-xs font-medium text-gray-900" htmlFor="confirm_password">
+          Confirm Password
+        </label>
+        <div className="relative">
+          <input
+            className={`peer block w-full rounded-md border ${errors.confirm_password ? 'border-red-500' : 'border-gray-200'} py-[9px] pl-10 text-sm outline-2 placeholder:text-gray-500`}
+            id="confirm_password"
+            type={showConfirmPassword ? 'text' : 'password'} // Toggle between text and password
+            {...register('confirm_password', { required: true })}
+            placeholder="Confirm your password"
+            required
+          />
+          <KeyIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+          <button
+            type="button"
+            onClick={toggleConfirmPasswordVisibility}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-900"
+            aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+          >
+            {showConfirmPassword ? (
+              <FaEyeSlash className="h-5 w-5" /> // Closed eye icon
+            ) : (
+              <FaEye className="h-5 w-5" /> // Open eye icon
+            )}
+          </button>
+        </div>
+        {/* {errors.confirm_password && (
+          <p className="mt-1 text-sm text-red-500">{errors.confirm_password.message}</p>
+        )} */}
+      </div>
 
           {/* Address */}
           <div>

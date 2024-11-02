@@ -1,5 +1,6 @@
 import GymFlowLogo from '@/app/ui/gymflow-logo'; // Import your GYMFlow-specific logo
 import RegisterForm from '@/app/ui/register-form';
+import Link from 'next/link';
 
 export default function LoginPage() {
   return (
@@ -13,8 +14,10 @@ export default function LoginPage() {
         <h1 className="text-2xl font-semibold text-center text-gray-800 md:text-3xl">Register</h1>
         <RegisterForm />
         <div className="flex justify-center">
-          <a href="#" className="text-sm text-blue-500 hover:underline">Forgot Password?</a>
-        </div>
+  <Link href="/forgot-password" className="text-sm text-blue-500 hover:underline">
+    Forgot Password?
+  </Link>
+</div>
       </div>
     </main>
   );

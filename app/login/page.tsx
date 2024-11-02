@@ -1,5 +1,6 @@
 import GymFlowLogo from '@/app/ui/gymflow-logo'; // Import your GYMFlow-specific logo
 import LoginForm from '@/app/ui/login-form';
+import Link from 'next/link';
 
 export default function LoginPage() {
   return (
@@ -11,6 +12,7 @@ export default function LoginPage() {
           </div>
         </div>
         <LoginForm />
+     
       </div>
     </main>
   );
