@@ -15,6 +15,7 @@ import { Button } from './button';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { useRouter } from "next/navigation"; // Ensure correct import
+import Link from 'next/link';
 
 
 
@@ -254,6 +255,15 @@ export default function RegistrationForm() {
         <span className="text-sm font-medium">Create an account</span>
         <ArrowRightIcon className="h-5 w-5 text-gray-600 transition-transform group-hover:translate-x-1" />
       </Button>
+
+
+        {/* Already have an account? Login */}
+        <p className="mt-4 text-center text-sm text-gray-500">
+          Already have an account?{' '}
+          <Link href="/login" className="text-blue-500 hover:text-blue-700 underline">
+            Log in
+          </Link>
+        </p>
     </form>
   );
 }

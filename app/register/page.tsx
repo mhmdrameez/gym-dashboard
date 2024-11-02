@@ -10,7 +10,7 @@ export default function LoginPage() {
             <AcmeLogo />
           </div>
         </div>
-        <h1 className="text-2xl font-semibold text-center text-gray-800 md:text-3xl">Login</h1>
+        <h1 className="text-2xl font-semibold text-center text-gray-800 md:text-3xl">Register</h1>
         <RegisterForm />
         <div className="flex justify-center">
           <a href="#" className="text-sm text-blue-500 hover:underline">Forgot Password?</a>

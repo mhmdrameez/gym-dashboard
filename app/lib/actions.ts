@@ -131,9 +131,9 @@ export async function authenticate(
       console.log("error",error);
       switch (error.type) {
         case 'CredentialsSignin':
-          return 'Invalid credentials.';
-        default:
           return 'Something went wrong.';
+        default:
+          return 'Invalid credentials.';
       }
     }
     throw error;
