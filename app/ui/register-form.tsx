@@ -17,8 +17,7 @@ import * as z from 'zod';
 import { useRouter } from "next/navigation"; // Ensure correct import
 import Link from 'next/link';
 
-
-
+// Define Zod schema for form validation
 const formSchema = z.object({
   first_name: z.string().min(1, { message: "First Name is required" }),
   last_name: z.string().min(1, { message: "Last Name is required" }),
@@ -37,6 +36,10 @@ export default function RegistrationForm() {
   const router = useRouter();
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [otpModalIsOpen, setOtpModalIsOpen] = useState(false);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState("");
+
   const {
     register,
     handleSubmit,
@@ -53,218 +56,338 @@ export default function RegistrationForm() {
       address: data.address,
       gym_name: data.gym_name,
     };
-
+  
     try {
+      // Make registration request
       const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/users/register`, requestBody);
       console.log('Registration successful:', response.data);
-      setErrorMessage(null); // Clear any existing error messages on success
-
-      setTimeout(() => {
-        router.push("/login"); // Redirect to home or another page
-      }, 1000);
-      // You can also navigate or perform any actions upon successful registration here
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response) {
-          // Error response from server
-          const serverMessage = error.response.data.message || "An error occurred. Please try again.";
-          setErrorMessage(serverMessage); // Set error message from server
+  
+      // Check if the response contains the expected properties
+      if (response.data && response.data.succes && response.data.data && response.data.data.access) {
+        setErrorMessage(null); // Clear any existing error messages on success
+        
+        // Safely store access token for OTP verification
+        const accessToken = response.data.data.access['x-access-token'];
+        if (accessToken) {
+          setAccessToken(accessToken);
+          setOtpModalIsOpen(true); // Open OTP modal
         } else {
-          // The request was made but no response was received
-          setErrorMessage("No response received from server. Please try again later.");
+          setErrorMessage("Access token not received. Please try again.");
         }
       } else {
-        // Fallback for unexpected errors
-        setErrorMessage("An unexpected error occurred.");
+        setErrorMessage("Registration failed. Please check your details.");
       }
-      // console.error('Registration error:', error);
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const serverMessage = error.response?.data.message || "An error occurred. Please try again.";
+        console.error('Server error:', serverMessage);
+        setErrorMessage(serverMessage);
+      } else {
+        console.error('Unexpected error:', error);
+        setErrorMessage("An unexpected error occurred. Please try again.");
+      }
     }
   };
 
+  const [otp, setOtp] = useState('');
+
+  const handleOtpChange = (e:any) => {
+    setOtp(e.target.value);
+    setErrorMessage(''); // Clear error message on input change
+  };
+
+  const verifyOtp = () => {
+    // Input validation
+    if (!otp ||  otp.length !== 4) { // Adjust the length as necessary
+      setErrorMessage("Please enter a valid 4-digit OTP.");
+      return;
+    }
+    
+    handleVerifyOtp(otp);
+  };
+  
+  const handleVerifyOtp = async (otp: any) => {
+    if (!otp || isNaN(otp) || otp.toString().length !== 4) {
+      setErrorMessage("Please enter a valid 4-digit OTP."); // Adjust length as per your OTP requirement
+      return;
+    }
+  
+    console.log('Verifying OTP:', otp);
+  
+    try {
+      const response = await axios.post(`https://fitbilsass.onrender.com/users/verify_otp`, {
+        otp: otp,
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+          'x-access-token': accessToken,
+        }
+      });
+  
+      console.log('OTP verification response:', response);
+  
+      if (response?.data?.status === true) {
+        setErrorMessage(""); // Clear any existing error messages
+        setSuccessMessage("OTP verified successfully! Redirecting to login..."); // Show success message
+  
+        // Close OTP modal and redirect to login after 3 seconds
+        setTimeout(() => {
+          setOtpModalIsOpen(false); // Close OTP modal
+          router.push("/login"); // Redirect to login
+        }, 3000); // 3000 ms = 3 seconds
+      } else {
+        setErrorMessage("Invalid OTP. Please try again.");
+      }
+    } catch (error) {
+      console.error('OTP verification error:', error);
+      
+      if (axios.isAxiosError(error)) {
+        const serverMessage = error.response?.data.message;
+  
+        // Specific server error handling
+        if (serverMessage) {
+          if (serverMessage.includes("Invalid passcode")) {
+            setErrorMessage("The OTP you entered is incorrect. Please check and try again.");
+          } else {
+            setErrorMessage(serverMessage); // Display server message if available
+          }
+        } else {
+          setErrorMessage("OTP verification failed. Please try again."); // Generic fallback
+        }
+      } else {
+        setErrorMessage("An unexpected error occurred during OTP verification. Please try again.");
+      }
+    }
+  };
+  
+  
+  
+  
+  
+  
+
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
-      <div className="flex-1 rounded-lg bg-gray-50 px-6 pb-4 pt-8">
-        <h1 className={`${lusitana.className} mb-3 text-2xl`}>
-          Create an account
-        </h1>
-
-
-
-        {/* First Name */}
-        <div>
-          <label className="mb-3 mt-5 block text-xs font-medium text-gray-900" htmlFor="first_name">First Name</label>
-          <div className="relative">
+    <>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+        <div className="flex-1 rounded-lg bg-gray-50 px-6 pb-4 pt-8">
+          <h1 className={`${lusitana.className} mb-3 text-2xl`}>
+            Create an account
+          </h1>
+  
+          {/* First Name */}
+          <div>
+            <label className="mb-3 mt-5 block text-xs font-medium text-gray-900" htmlFor="first_name">
+              First Name
+            </label>
+            <div className="relative">
+              <input
+                className={`peer block w-full rounded-md border ${errors.first_name ? 'border-red-500' : 'border-gray-200'} py-[9px] pl-10 text-sm outline-2 placeholder:text-gray-500`}
+                id="first_name"
+                type="text"
+                {...register('first_name', { required: true })}
+                placeholder="Enter your first name"
+                required
+              />
+              <UserCircleIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+            </div>
+            {/* {errors.first_name && (
+              <p className="mt-1 text-sm text-red-500">{errors.first_name.message}</p>
+            )} */}
+          </div>
+  
+          {/* Last Name */}
+          <div>
+            <label className="mb-3 mt-5 block text-xs font-medium text-gray-900" htmlFor="last_name">
+              Last Name
+            </label>
+            <div className="relative">
+              <input
+                className={`peer block w-full rounded-md border ${errors.last_name ? 'border-red-500' : 'border-gray-200'} py-[9px] pl-10 text-sm outline-2 placeholder:text-gray-500`}
+                id="last_name"
+                type="text"
+                {...register('last_name', { required: true })}
+                placeholder="Enter your last name"
+                required
+              />
+              <UserCircleIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+            </div>
+            {/* {errors.last_name && (
+              <p className="mt-1 text-sm text-red-500">{errors.last_name.message}</p>
+            )} */}
+          </div>
+  
+          {/* Email */}
+          <div>
+            <label className="mb-3 mt-5 block text-xs font-medium text-gray-900" htmlFor="email">
+              Email
+            </label>
+            <div className="relative">
+              <input
+                className={`peer block w-full rounded-md border ${errors.email ? 'border-red-500' : 'border-gray-200'} py-[9px] pl-10 text-sm outline-2 placeholder:text-gray-500`}
+                id="email"
+                type="email"
+                {...register('email', { required: true })}
+                placeholder="Enter your email address"
+                required
+              />
+              <AtSymbolIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+            </div>
+            {/* {errors.email && (
+              <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>
+            )} */}
+          </div>
+  
+          {/* Phone Number */}
+          <div>
+            <label className="mb-3 mt-5 block text-xs font-medium text-gray-900" htmlFor="phone">
+              Phone Number
+            </label>
+            <div className="relative">
+              <input
+                className={`peer block w-full rounded-md border ${errors.phone ? 'border-red-500' : 'border-gray-200'} py-[9px] pl-10 text-sm outline-2 placeholder:text-gray-500`}
+                id="phone"
+                type="text"
+                {...register('phone', { required: true })}
+                placeholder="Enter your phone number"
+                required
+                maxLength={10}
+              />
+              <PhoneIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+            </div>
+            {/* {errors.phone && (
+              <p className="mt-1 text-sm text-red-500">{errors.phone.message}</p>
+            )} */}
+          </div>
+  
+          {/* Password */}
+          <div>
+            <label className="mb-3 mt-5 block text-xs font-medium text-gray-900" htmlFor="password">
+              Password
+            </label>
+            <div className="relative">
+              <input
+                className={`peer block w-full rounded-md border ${errors.password ? 'border-red-500' : 'border-gray-200'} py-[9px] pl-10 text-sm outline-2 placeholder:text-gray-500`}
+                id="password"
+                type="password"
+                {...register('password', { required: true })}
+                placeholder="Create a password"
+                required
+              />
+              <KeyIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+            </div>
+            {/* {errors.password && (
+              <p className="mt-1 text-sm text-red-500">{errors.password.message}</p>
+            )} */}
+          </div>
+  
+          {/* Confirm Password */}
+          <div>
+            <label className="mb-3 mt-5 block text-xs font-medium text-gray-900" htmlFor="confirm_password">
+              Confirm Password
+            </label>
+            <div className="relative">
+              <input
+                className={`peer block w-full rounded-md border ${errors.confirm_password ? 'border-red-500' : 'border-gray-200'} py-[9px] pl-10 text-sm outline-2 placeholder:text-gray-500`}
+                id="confirm_password"
+                type="password"
+                {...register('confirm_password', { required: true })}
+                placeholder="Confirm your password"
+                required
+              />
+              <KeyIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+            </div>
+            {/* {errors.confirm_password && (
+              <p className="mt-1 text-sm text-red-500">{errors.confirm_password.message}</p>
+            )} */}
+          </div>
+  
+          {/* Address */}
+          <div>
+            <label className="mb-3 mt-5 block text-xs font-medium text-gray-900" htmlFor="address">
+              Address
+            </label>
+            <div className="relative">
+              <input
+                className={`peer block w-full rounded-md border ${errors.address ? 'border-red-500' : 'border-gray-200'} py-[9px] pl-10 text-sm outline-2 placeholder:text-gray-500`}
+                id="address"
+                type="text"
+                {...register('address', { required: true })}
+                placeholder="Enter your address"
+                required
+              />
+              <HomeIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+            </div>
+            {/* {errors.address && (
+              <p className="mt-1 text-sm text-red-500">{errors.address.message}</p>
+            )} */}
+          </div>
+  
+          {/* Gym Center Name */}
+          <div>
+            <label className="mb-3 mt-5 block text-xs font-medium text-gray-900" htmlFor="gym_name">
+              Gym Center Name
+            </label>
+            <div className="relative">
+              <input
+                className={`peer block w-full rounded-md border ${errors.gym_name ? 'border-red-500' : 'border-gray-200'} py-[9px] pl-10 text-sm outline-2 placeholder:text-gray-500`}
+                id="gym_name"
+                type="text"
+                {...register('gym_name', { required: true })}
+                placeholder="Enter your gym center name"
+                required
+              />
+              <HomeIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+            </div>
+            {/* {errors.gym_name && (
+              <p className="mt-1 text-sm text-red-500">{errors.gym_name.message}</p>
+            )} */}
+          </div>
+        </div>
+  
+        {/* Display error message if it exists */}
+        {errorMessage && (
+          <p className="mt-1 text-sm text-red-500">{errorMessage}</p>
+        )}
+  
+        {/* Submit Button */}
+        <Button type="submit" className="group custom-button relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-md px-6 py-4">
+          <span className="text-sm font-medium">Create an account</span>
+        </Button>
+      </form>
+  
+      {/* Custom OTP Modal */}
+      {otpModalIsOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg p-6 w-96">
+            <h2 className="text-xl mb-4">Verify OTP</h2>
+            {errorMessage && <p className="text-red-500 mb-2">{errorMessage}</p>}
             <input
-              className={`peer block w-full rounded-md border ${errors.first_name ? 'border-red-500' : 'border-gray-200'} py-[9px] pl-10 text-sm outline-2 placeholder:text-gray-500`}
-              id="first_name"
               type="text"
-              {...register('first_name', { required: true })}
-              placeholder="Enter your first name"
-              required
+              placeholder="Enter OTP"
+              className="border rounded p-2 w-full mb-4"
+              value={otp}
+              onChange={handleOtpChange}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  verifyOtp();
+                }
+              }}
+              maxLength={4}
             />
-            <UserCircleIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+            <div className="flex justify-between">
+              <Button
+                onClick={verifyOtp}
+                className="bg-blue-500 text-white rounded px-4 py-2"
+              >
+                Verify OTP
+              </Button>
+              <button onClick={() => setOtpModalIsOpen(false)} className="text-red-500">Close</button>
+            </div>
           </div>
-          {errors.first_name && (
-            <p className="mt-1 text-sm text-red-500">{(errors.first_name as any).message}</p>
-          )}
         </div>
-
-        {/* Last Name */}
-        <div>
-          <label className="mb-3 mt-5 block text-xs font-medium text-gray-900" htmlFor="last_name">Last Name</label>
-          <div className="relative">
-            <input
-              className={`peer block w-full rounded-md border ${errors.last_name ? 'border-red-500' : 'border-gray-200'} py-[9px] pl-10 text-sm outline-2 placeholder:text-gray-500`}
-              id="last_name"
-              type="text"
-              {...register('last_name', { required: true })}
-              placeholder="Enter your last name"
-              required
-            />
-            <UserCircleIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
-          </div>
-          {errors.last_name && (
-            <p className="mt-1 text-sm text-red-500">{(errors.last_name as any).message}</p>
-          )}
-        </div>
-
-        {/* Email */}
-        <div>
-          <label className="mb-3 mt-5 block text-xs font-medium text-gray-900" htmlFor="email">Email</label>
-          <div className="relative">
-            <input
-              className={`peer block w-full rounded-md border ${errors.email ? 'border-red-500' : 'border-gray-200'} py-[9px] pl-10 text-sm outline-2 placeholder:text-gray-500`}
-              id="email"
-              type="email"
-              {...register('email', { required: true })}
-              placeholder="Enter your email address"
-              required
-            />
-            <AtSymbolIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
-          </div>
-          {errors.email && (
-            <p className="mt-1 text-sm text-red-500">{(errors.email as any).message}</p>
-          )}
-        </div>
-
-        {/* Phone Number */}
-        <div>
-          <label className="mb-3 mt-5 block text-xs font-medium text-gray-900" htmlFor="phone">Phone Number</label>
-          <div className="relative">
-            <input
-              className={`peer block w-full rounded-md border ${errors.phone ? 'border-red-500' : 'border-gray-200'} py-[9px] pl-10 text-sm outline-2 placeholder:text-gray-500`}
-              id="phone"
-              type="text"
-              {...register('phone', { required: true })}
-              placeholder="Enter your phone number"
-              required
-              maxLength={10}
-            />
-            <PhoneIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
-          </div>
-          {errors.phone && (
-            <p className="mt-1 text-sm text-red-500">{(errors.phone as any).message}</p>
-          )}
-        </div>
-
-        {/* Password */}
-        <div>
-          <label className="mb-3 mt-5 block text-xs font-medium text-gray-900" htmlFor="password">Password</label>
-          <div className="relative">
-            <input
-              className={`peer block w-full rounded-md border ${errors.password ? 'border-red-500' : 'border-gray-200'} py-[9px] pl-10 text-sm outline-2 placeholder:text-gray-500`}
-              id="password"
-              type="password"
-              {...register('password', { required: true })}
-              placeholder="Create a password"
-              required
-            />
-            <KeyIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
-          </div>
-          {errors.password && (
-            <p className="mt-1 text-sm text-red-500">{(errors.password as any).message}</p>
-          )}
-        </div>
-
-        {/* Confirm Password */}
-        <div>
-          <label className="mb-3 mt-5 block text-xs font-medium text-gray-900" htmlFor="confirm_password">Confirm Password</label>
-          <div className="relative">
-            <input
-              className={`peer block w-full rounded-md border ${errors.confirm_password ? 'border-red-500' : 'border-gray-200'} py-[9px] pl-10 text-sm outline-2 placeholder:text-gray-500`}
-              id="confirm_password"
-              type="password"
-              {...register('confirm_password', { required: true })}
-              placeholder="Confirm your password"
-              required
-            />
-            <KeyIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
-          </div>
-          {errors.confirm_password && (
-            <p className="mt-1 text-sm text-red-500">{(errors.confirm_password as any).message}</p>
-          )}
-        </div>
-
-        {/* Address */}
-        <div>
-          <label className="mb-3 mt-5 block text-xs font-medium text-gray-900" htmlFor="address">Address</label>
-          <div className="relative">
-            <input
-              className={`peer block w-full rounded-md border ${errors.address ? 'border-red-500' : 'border-gray-200'} py-[9px] pl-10 text-sm outline-2 placeholder:text-gray-500`}
-              id="address"
-              type="text"
-              {...register('address', { required: true })}
-              placeholder="Enter your address"
-              required
-            />
-            <HomeIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
-          </div>
-          {errors.address && (
-            <p className="mt-1 text-sm text-red-500">{(errors.address as any).message}</p>
-          )}
-        </div>
-
-        {/* Gym Center Name */}
-        <div>
-          <label className="mb-3 mt-5 block text-xs font-medium text-gray-900" htmlFor="gym_name">Gym Center Name</label>
-          <div className="relative">
-            <input
-              className={`peer block w-full rounded-md border ${errors.gym_name ? 'border-red-500' : 'border-gray-200'} py-[9px] pl-10 text-sm outline-2 placeholder:text-gray-500`}
-              id="gym_name"
-              type="text"
-              {...register('gym_name', { required: true })}
-              placeholder="Enter your gym center name"
-              required
-            />
-            <HomeIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
-          </div>
-          {errors.gym_name && (
-            <p className="mt-1 text-sm text-red-500">{(errors.gym_name as any).message}</p>
-          )}
-        </div>
-      </div>
-
-
-      {/* Display error message if it exists */}
-      {errorMessage && (
-        <p className="mt-1 text-sm text-red-500">{errorMessage}</p>
       )}
-
-      {/* Submit Button */}
-      <Button type="submit" className="group custom-button relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-md px-6 py-4">
-        <span className="text-sm font-medium">Create an account</span>
-        <ArrowRightIcon className="h-5 w-5 arrow-icon" />
-      </Button>
-
-
-
-      {/* Already have an account? Login */}
-      <p className="mt-4 text-center text-sm text-gray-500">
-        Already have an account?{' '}
-        <Link href="/login" className="text-blue-500 hover:text-blue-700 underline">
-          Log in
-        </Link>
-      </p>
-    </form>
+    </>
   );
+  
 }
