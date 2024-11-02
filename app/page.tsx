@@ -26,14 +26,14 @@ export default function Page() {
         </div>
         <div className="flex items-center justify-center p-6 md:w-3/5 md:px-28 md:py-12">
           <Image
-            src="/gymflow-desktop.png" // Replace with your gym-related hero image
+            src="/threadmill.jpg" // Replace with your gym-related hero image
             width={1000}
             height={760}
             alt="Screenshots of the GYMFlow dashboard showing desktop version"
             className="hidden md:block"
           />
           <Image
-            src="/gymflow-mobile.png" // Replace with mobile version image
+            src="/threadmill.jpg" // Replace with mobile version image
             width={560}
             height={620}
             alt="Screenshot of the GYMFlow dashboard showing mobile version"
