@@ -1,4 +1,4 @@
-import AcmeLogo from '@/app/ui/acme-logo';
+import GymFlowLogo from '@/app/ui/gymflow-logo'; // Import your GYMFlow-specific logo
 import RegisterForm from '@/app/ui/register-form';
 
 export default function LoginPage() {
@@ -7,7 +7,7 @@ export default function LoginPage() {
       <div className="relative mx-auto flex w-full max-w-[400px] flex-col space-y-4 rounded-lg bg-white shadow-lg p-6 md:p-8">
         <div className="flex items-end justify-center rounded-lg bg-blue-500 p-4">
           <div className="w-32 text-white md:w-36">
-            <AcmeLogo />
+            <GymFlowLogo />
           </div>
         </div>
         <h1 className="text-2xl font-semibold text-center text-gray-800 md:text-3xl">Register</h1>
