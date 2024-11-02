@@ -75,7 +75,7 @@ export default function RegistrationForm() {
         }
       } else {
         // Fallback for unexpected errors
-        setErrorMessage("An unexpected error occurred."); 
+        setErrorMessage("An unexpected error occurred.");
       }
       // console.error('Registration error:', error);
     }
@@ -88,7 +88,7 @@ export default function RegistrationForm() {
           Create an account
         </h1>
 
-      
+
 
         {/* First Name */}
         <div>
@@ -245,25 +245,26 @@ export default function RegistrationForm() {
       </div>
 
 
-        {/* Display error message if it exists */}
-        {errorMessage && (
-          <p className="mt-1 text-sm text-red-500">{errorMessage}</p>
-        )}
+      {/* Display error message if it exists */}
+      {errorMessage && (
+        <p className="mt-1 text-sm text-red-500">{errorMessage}</p>
+      )}
 
       {/* Submit Button */}
-      <Button type="submit" className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-md border-2 border-gray-200 bg-gray-50 px-6 py-4 text-gray-600 transition hover:border-gray-300 hover:bg-gray-200 hover:text-gray-700">
+      <Button type="submit" className="group custom-button relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-md px-6 py-4">
         <span className="text-sm font-medium">Create an account</span>
-        <ArrowRightIcon className="h-5 w-5 text-gray-600 transition-transform group-hover:translate-x-1" />
+        <ArrowRightIcon className="h-5 w-5 arrow-icon" />
       </Button>
 
 
-        {/* Already have an account? Login */}
-        <p className="mt-4 text-center text-sm text-gray-500">
-          Already have an account?{' '}
-          <Link href="/login" className="text-blue-500 hover:text-blue-700 underline">
-            Log in
-          </Link>
-        </p>
+
+      {/* Already have an account? Login */}
+      <p className="mt-4 text-center text-sm text-gray-500">
+        Already have an account?{' '}
+        <Link href="/login" className="text-blue-500 hover:text-blue-700 underline">
+          Log in
+        </Link>
+      </p>
     </form>
   );
 }
