@@ -68,17 +68,16 @@ export default function LoginForm() {
           </div>
         </div>
         <Button className="mt-4 w-full" aria-disabled={isPending}>
-          {isPending ? (
-            <span className="flex items-center justify-center">
-              Loading...
-              <ArrowRightIcon className="ml-2 h-5 w-5 animate-spin text-gray-50" />
-            </span>
-          ) : (
-            <>
-              Log in <ArrowRightIcon className="ml-auto h-5 w-5 text-gray-50" />
-            </>
-          )}
-        </Button>
+  {isPending ? (
+    <span className="flex items-center justify-center">
+      <span className="loader ml-2"></span> {/* Loader span with custom CSS */}
+    </span>
+  ) : (
+    <>
+      Log in <ArrowRightIcon className="ml-auto h-5 w-5 text-gray-50" />
+    </>
+  )}
+</Button>
         <div
           className="flex h-8 items-end space-x-1"
           aria-live="polite"
