@@ -9,6 +9,12 @@ import {
   CardsSkeleton,
 } from '@/app/ui/skeletons';
 
+export const metadata = {
+  title: "Dashboard", 
+  description: "GYM Dashboard",
+};
+
+
 export default async function Page() {
   return (
     <main>
