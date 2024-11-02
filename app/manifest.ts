@@ -2,8 +2,8 @@ import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Gym Connect',
-    short_name: 'GymCon',
+    name: 'Gym Flow',
+    short_name: 'GymFlow',
     description: 'A Progressive Web App for gym enthusiasts to connect and track their progress.',
     start_url: '/',
     display: 'standalone',
