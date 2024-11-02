@@ -26,7 +26,7 @@ export default function Page() {
         </div>
         <div className="flex items-center justify-center p-6 md:w-3/5 md:px-28 md:py-12">
           <Image
-            src="/threadmill.jpg" // Replace with your gym-related hero image
+            src="/threadmill.jpg" // Replace with your gym-related hero images
             width={1000}
             height={760}
             alt="Screenshots of the GYMFlow dashboard showing desktop version"
