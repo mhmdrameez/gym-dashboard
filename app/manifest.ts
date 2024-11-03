@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'Gym Flow',
     short_name: 'GymFlow',
-    description: 'A Progressive Web App for gym enthusiasts to connect and track their progress',
+    description: 'A Progressive Web App for gym enthusiasts to connect and track their progress.',
     start_url: '/',
     display: 'standalone',
     background_color: '#f0f0f0',
