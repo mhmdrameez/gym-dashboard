@@ -8,7 +8,7 @@ export default function manifest(): MetadataRoute.Manifest {
     start_url: '/',
     display: 'standalone',
     background_color: '#f0f0f0',
-    theme_color: '#4CAF50', // Green, often associated with health and fitness
+    theme_color: '#87CEEB', 
     icons: [
       {
         src: '/icon-192x192.png',
