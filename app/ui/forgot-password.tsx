@@ -43,7 +43,7 @@ export default function ForgotPasswordPage() {
       );
       setStep(2); // Move to OTP verification step
     } catch (error) {
-      setErrorMessage('Failed to send forgot password email.');
+      setErrorMessage('Please verify your email to reset your password.');
     } finally {
       setIsLoading(false);
     }
