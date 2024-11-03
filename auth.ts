@@ -1,6 +1,5 @@
 import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
-import axios from 'axios';
 import { authConfig } from './auth.config';
 
 export const { auth, signIn, signOut } = NextAuth({
@@ -8,7 +7,6 @@ export const { auth, signIn, signOut } = NextAuth({
   providers: [
     Credentials({
       async authorize(credentials) {
-        // Directly extract email and password from credentials
         const { email, password } = credentials;
 
         console.log("credentials", credentials);
@@ -21,22 +19,32 @@ export const { auth, signIn, signOut } = NextAuth({
 
         console.log("payload", payload);
 
-        // Make an API request to your custom login endpoint using axios
         try {
-          const response = await axios.post(
+          // Make an API request to your custom login endpoint using fetch
+          const response = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/users/login`,
-            payload,
             {
+              method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
               },
+              body: JSON.stringify(payload),
             }
           );
 
-          console.log("response", response?.data);
+          console.log("response", response);
+
+          // Check if the response is successful
+          if (!response.ok) {
+            console.error('Failed to authenticate');
+            return null;
+          }
+
+          // Parse the JSON response
+          const result = await response.json();
 
           // Extract user data from the API response
-          const { succes, data } = response.data;
+          const { succes, data } = result;
 
           if (succes) {
             const { user, access } = data;
@@ -49,6 +57,7 @@ export const { auth, signIn, signOut } = NextAuth({
             return null;
           }
         } catch (error) {
+          console.error('Error during authentication:', error);
           return null;
         }
       },
