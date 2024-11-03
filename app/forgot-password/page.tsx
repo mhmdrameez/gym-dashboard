@@ -1,5 +1,6 @@
 import GymFlowLogo from '@/app/ui/gymflow-logo'; // Import your GYMFlow-specific logo
 import ForgotPassword from '@/app/ui/forgot-password';
+import Link from 'next/link';
 
 export default function LoginPage() {
   return (
@@ -11,7 +12,18 @@ export default function LoginPage() {
           </div>
         </div>
         <ForgotPassword />
+        <div className="flex justify-center">
+
+          <p className="text-sm text-gray-600">
+          Want to log in to your account?{' '}
+            <Link href="/login" className="text-blue-500 underline">
+              Login here
+            </Link>
+          </p>
+        </div>
       </div>
+
+
     </main>
   );
 }

@@ -13,11 +13,23 @@ export default function LoginPage() {
         </div>
         <h1 className="text-2xl font-semibold text-center text-gray-800 md:text-3xl">Register</h1>
         <RegisterForm />
+      
         <div className="flex justify-center">
-  <Link href="/forgot-password" className="text-sm text-blue-500 hover:underline">
-    Forgot Password?
-  </Link>
-</div>
+
+        <p className="text-sm text-gray-600">
+            Already account?{' '}
+            <Link href="/login" className="text-blue-500 underline">
+              Login here
+            </Link>
+          </p>
+          </div>
+
+        <div className="flex justify-center">
+          <Link href="/forgot-password" className="text-sm text-blue-500 hover:underline">
+            Forgot Password?
+          </Link>
+        </div>
+
       </div>
     </main>
   );
