@@ -12,11 +12,19 @@ export const db = mysql.createPool({
 });
 
 export const raw = async (sql: string, bindings?: any) => {
-  try {
-    const [rows] = await db.execute(sql, bindings);
-    return rows.length === 1 ? rows[0] : rows;
-  } catch (error) {
-    console.error("Database query error:", error);
-    throw new Error("Failed to execute query.");
-  }
-};
+    try {
+      const [rows] = await db.execute(sql, bindings);
+  
+      // Check if rows is an array to handle SELECT queries
+      if (Array.isArray(rows)) {
+        return rows.length === 1 ? rows[0] : rows;
+      }
+  
+      // Return rows directly for non-SELECT queries (like INSERT, UPDATE)
+      return rows;
+    } catch (error) {
+      console.error("Database query error:", error);
+      throw new Error("Failed to execute query.");
+    }
+  };
+  
