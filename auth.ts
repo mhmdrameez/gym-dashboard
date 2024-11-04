@@ -7,17 +7,42 @@ import type { User } from '@/app/lib/definitions';
 import { authConfig } from './auth.config';
 import { raw } from "./app/lib/db"; // Ensure this path is correct
 
+type User = {
+  id: number;
+  email: string;
+  first_name: string;
+  last_name: string;
+  password: string;
+  address: string | null;
+  gym_name: string | null;
+  phone: string;
+  otp: string;
+  device_token: string;
+  password_reset_token: string | null;
+  account_verified: string;
+  is_blocked: string;
+  is_deleted: string;
+  created_at: Date;
+  updated_at: Date;
+};
+
+
 
 async function getUser(email: string): Promise<User | null> {
   try {
-    const userQuery = await raw("SELECT * FROM users WHERE email = ?", [email]);
-    console.log("Usets",userQuery);
-    return userQuery ? userQuery : null;
+    const userQuery = await raw<User>("SELECT * FROM users WHERE email = ?", [email]);
+
+    // Check if userQuery is an object and cast it as User
+    if (userQuery && !Array.isArray(userQuery)) {
+      return userQuery as User;
+    }
+    return null;
   } catch (error) {
     console.error("Failed to fetch user:", error);
     return null;
   }
 }
+
 
 export const { auth, signIn, signOut } = NextAuth({
   ...authConfig,
