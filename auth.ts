@@ -3,7 +3,6 @@ import Credentials from 'next-auth/providers/credentials';
 import bcrypt from 'bcrypt';
 import { sql } from '@vercel/postgres';
 import { z } from 'zod';
-import type { User } from '@/app/lib/definitions';
 import { authConfig } from './auth.config';
 import { raw } from "./app/lib/db"; // Ensure this path is correct
 
