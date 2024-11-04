@@ -29,9 +29,10 @@ type User = {
 
 async function getUser(email: string): Promise<User | null> {
   try {
-    const userQuery = await raw<User>("SELECT * FROM users WHERE email = ?", [email]);
+    // Remove the <User> type parameter from `raw` call
+    const userQuery = await raw("SELECT * FROM users WHERE email = ?", [email]);
 
-    // Check if userQuery is an object and cast it as User
+    // Type cast the result to `User` if the query returned an object
     if (userQuery && !Array.isArray(userQuery)) {
       return userQuery as User;
     }
