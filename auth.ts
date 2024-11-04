@@ -7,7 +7,7 @@ import { authConfig } from './auth.config';
 import { raw } from "./app/lib/db"; // Ensure this path is correct
 
 type User = {
-  id: number;
+  id: string; // Changed id to string
   email: string;
   first_name: string;
   last_name: string;
@@ -25,14 +25,10 @@ type User = {
   updated_at: Date;
 };
 
-
-
 async function getUser(email: string): Promise<User | null> {
   try {
-    // Remove the <User> type parameter from `raw` call
     const userQuery = await raw("SELECT * FROM users WHERE email = ?", [email]);
 
-    // Type cast the result to `User` if the query returned an object
     if (userQuery && !Array.isArray(userQuery)) {
       return userQuery as User;
     }
@@ -43,12 +39,11 @@ async function getUser(email: string): Promise<User | null> {
   }
 }
 
-
 export const { auth, signIn, signOut } = NextAuth({
   ...authConfig,
   providers: [
     Credentials({
-      async authorize(credentials) {
+      async authorize(credentials, request) { // Added request parameter
         const parsedCredentials = z
           .object({ email: z.string().email() }) // Check only for email
           .safeParse(credentials);
@@ -58,7 +53,6 @@ export const { auth, signIn, signOut } = NextAuth({
     
           const user = await getUser(email);
     
-          // Log user details if found
           if (user) {
             console.log("Signed in user:", {
               id: user.id,
@@ -69,7 +63,7 @@ export const { auth, signIn, signOut } = NextAuth({
               created_at: user.created_at,
               updated_at: user.updated_at,
             });
-            return user; // Return the user if found
+            return user;
           }
         }
     
@@ -77,7 +71,5 @@ export const { auth, signIn, signOut } = NextAuth({
         return null;
       },
     }),
-    
-    
   ],
-})
+});
