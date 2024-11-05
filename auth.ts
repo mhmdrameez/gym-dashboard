@@ -1,74 +1,65 @@
 import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
-import bcrypt from 'bcrypt';
-import { sql } from '@vercel/postgres';
-import { z } from 'zod';
 import { authConfig } from './auth.config';
-import { raw } from "./app/lib/db"; // Ensure this path is correct
-
-type User = {
-  id: string; // Changed id to string
-  email: string;
-  first_name: string;
-  last_name: string;
-  password: string;
-  address: string | null;
-  gym_name: string | null;
-  phone: string;
-  otp: string;
-  device_token: string;
-  password_reset_token: string | null;
-  account_verified: string;
-  is_blocked: string;
-  is_deleted: string;
-  created_at: Date;
-  updated_at: Date;
-};
-
-async function getUser(email: string): Promise<User | null> {
-  try {
-    const userQuery = await raw("SELECT * FROM users WHERE email = ?", [email]);
-
-    if (userQuery && !Array.isArray(userQuery)) {
-      return userQuery as User;
-    }
-    return null;
-  } catch (error) {
-    console.error("Failed to fetch user:", error);
-    return null;
-  }
-}
 
 export const { auth, signIn, signOut } = NextAuth({
   ...authConfig,
   providers: [
     Credentials({
-      async authorize(credentials, request) { // Added request parameter
-        const parsedCredentials = z
-          .object({ email: z.string().email() }) // Check only for email
-          .safeParse(credentials);
-    
-        if (parsedCredentials.success) {
-          const { email } = parsedCredentials.data;
-    
-          const user = await getUser(email);
-    
-          if (user) {
-            console.log("Signed in user:", {
-              id: user.id,
-              email: user.email,
-              first_name: user.first_name,
-              last_name: user.last_name,
-              phone: user.phone,
-              created_at: user.created_at,
-              updated_at: user.updated_at,
-            });
-            return user;
+      async authorize(credentials) {
+        const { email, password } = credentials;
+
+        console.log("credentials", credentials);
+
+        // Create a payload with only email and password
+        const payload = {
+          email,
+          password,
+        };
+
+        console.log("payload", payload);
+
+        try {
+          // Make an API request to your custom login endpoint using fetch
+          const response = await fetch(
+            `https://fitbilsass.onrender.com/users/login`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(payload),
+            }
+          );
+
+          console.log("response", response);
+
+          // Check if the response is successful
+          if (!response.ok) {
+            console.error('Failed to authenticate');
+            return null;
           }
+
+          // Parse the JSON response
+          const result = await response.json();
+
+          // Extract user data from the API response
+          const { succes, data } = result;
+
+          if (succes) {
+            const { user, access } = data;
+            if (user && user.email) {
+              // Return user data if authentication is successful
+              return { ...user, access }; // Include access tokens if needed
+            }
+          } else {
+            console.log('No user data returned from API');
+            return null;
+          }
+        } catch (error) {
+          console.error('Error during authentication:', error);
+          return null;
         }
-    
-        console.log('Invalid credentials or user not found');
-        return null;
       },
     }),
   ],
