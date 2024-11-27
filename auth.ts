@@ -22,7 +22,7 @@ export const { auth, signIn, signOut } = NextAuth({
         try {
           // Make an API request to your custom login endpoint using fetch
           const response = await fetch(
-            `https://fitbilsass.onrender.com/users/login`,
+            `${process.env.NEXT_PUBLIC_API_URL}/users/login`, // Constructing the full URL
             {
               method: 'POST',
               headers: {
