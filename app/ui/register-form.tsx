@@ -83,7 +83,7 @@ export default function RegistrationForm() {
       console.log('Registration successful:', response.data);
 
       // Check if the response contains the expected properties
-      if (response.data && response.data.succes && response.data.data && response.data.data.access) {
+      if (response.data && response.data.success && response.data.data && response.data.data.access) {
         setErrorMessage(null);
 
         const accessToken = response.data.data.access['x-access-token'];

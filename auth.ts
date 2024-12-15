@@ -51,9 +51,9 @@ export const { auth, signIn, signOut } = NextAuth({
           cookieStore.set('token', tokenToStore);
 
           // Extract user data from the API response
-          const { succes, data } = result;
+          const { success, data } = result;
 
-          if (succes) {
+          if (success) {
             const { user, access } = data;
             if (user && user.email) {
               // Return user data if authentication is successful
