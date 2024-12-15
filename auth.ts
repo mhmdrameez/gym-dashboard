@@ -1,6 +1,8 @@
 import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import { authConfig } from './auth.config';
+import { cookies } from 'next/headers'
+
 
 export const { auth, signIn, signOut } = NextAuth({
   ...authConfig,
@@ -10,6 +12,9 @@ export const { auth, signIn, signOut } = NextAuth({
         const { email, password } = credentials;
 
         console.log("credentials", credentials);
+
+        const cookieStore = await cookies()
+
 
         // Create a payload with only email and password
         const payload = {
@@ -42,6 +47,8 @@ export const { auth, signIn, signOut } = NextAuth({
 
           // Parse the JSON response
           const result = await response.json();
+          const tokenToStore = typeof result === 'object' ? JSON.stringify(result) : String(result);
+          cookieStore.set('token', tokenToStore);
 
           // Extract user data from the API response
           const { succes, data } = result;
