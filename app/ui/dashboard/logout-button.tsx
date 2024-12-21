@@ -1,12 +1,12 @@
 'use client';
 
 import { PowerIcon } from '@heroicons/react/24/outline';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function LogoutButton() {
-  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const handleLogout = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -16,31 +16,25 @@ export default function LogoutButton() {
       setIsLoading(true);
       console.log('Starting logout process...');
 
-      // Call API to handle logout
-      const response = await fetch('/api/logout', { method: 'POST' });
-      
-      if (response.ok) {
-        console.log('Logout successful, deleting cookies...');
-        
-        // Delete client-side cookies from different paths
-        const paths = ['/', '/dashboard', '/members'];
-        paths.forEach((path) => {
-          document.cookie = `token=; path=${path}; domain=.gym-dashboard-mu.vercel.app; expires=Thu, 01 Jan 1970 00:00:00 UTC; Secure; SameSite=None`;
-          console.log(`Cookie cleared from path: ${path}`);
-        });
-        
-        // Additional cookie deletion with domain
-        document.cookie = `token=; path=/; domain=.gym-dashboard-mu.vercel.app; expires=Thu, 01 Jan 1970 00:00:00 UTC; Secure; SameSite=None`;
-        console.log('Cookie cleared with domain: gym-dashboard-mu.vercel.app');
+      // Detect the current domain (local or deployed)
+      const domain = window.location.hostname === 'localhost' ? '' : `.gym-dashboard-mu.vercel.app`;
 
-        // Redirect to login page
-        window.location.replace('/login');
-      } else {
-        throw new Error('Logout failed');
-      }
+      // Delete client-side cookies from different paths
+      const paths = ['/', '/dashboard', '/members'];
+      paths.forEach((path) => {
+        document.cookie = `token=; path=${path}; domain=${domain}; expires=Thu, 01 Jan 1970 00:00:00 UTC; Secure; SameSite=None`;
+        console.log(`Cookie cleared from path: ${path}`);
+      });
+
+      // Also clear cookie with domain
+      document.cookie = `token=; path=/; domain=${domain}; expires=Thu, 01 Jan 1970 00:00:00 UTC; Secure; SameSite=None`;
+      console.log(`Cookie cleared with domain: ${domain}`);
+
+      // Redirect to login page after logout
+      window.location.replace('/login');
     } catch (error) {
       console.error('Error during sign out:', error);
-      
+
       // Fallback cookie deletion
       document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
       window.location.href = '/login';
