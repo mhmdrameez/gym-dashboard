@@ -12,9 +12,16 @@ export async function POST() {
 
     // Create response with proper headers
     const response = NextResponse.json(
-      { success: true, message: 'Logged out successfully' },
-      { status: 200 }
-    );
+        { success: true, message: 'Logged out successfully' },
+        { 
+          status: 200,
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type'
+          }
+        }
+      );
 
     // Ensure cookie is cleared in response
     response.cookies.set({
