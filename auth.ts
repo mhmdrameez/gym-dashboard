@@ -58,8 +58,8 @@ export const { auth, signIn, signOut } = NextAuth({
           // Set cookie with expiry and security options
           cookieStore.set('token', tokenToStore, {
             expires: tokenExpiry,
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
+            httpOnly: false,
+            secure: false,
             path: '/',
             sameSite: 'strict',
             maxAge: Math.floor((tokenExpiry.getTime() - Date.now()) / 1000) // Convert to seconds

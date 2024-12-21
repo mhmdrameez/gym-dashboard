@@ -1,12 +1,12 @@
 'use client';
 
 import { PowerIcon } from '@heroicons/react/24/outline';
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 export default function LogoutButton() {
-  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleLogout = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -14,33 +14,28 @@ export default function LogoutButton() {
 
     try {
       setIsLoading(true);
-      console.log('Starting logout process...');
 
-      // Detect the current domain (local or deployed)
-      const domain = window.location.hostname === 'localhost' ? '' : `.gym-dashboard-mu.vercel.app`;
-
-      // Delete client-side cookies from different paths
-      const paths = ['/', '/dashboard', '/members'];
-      paths.forEach((path) => {
-        document.cookie = `token=; path=${path}; domain=${domain}; expires=Thu, 01 Jan 1970 00:00:00 UTC; Secure; SameSite=None`;
-        console.log(`Cookie cleared from path: ${path}`);
+      const response = await fetch('/api/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
 
-      // Also clear cookie with domain
-      document.cookie = `token=; path=/; domain=${domain}; expires=Thu, 01 Jan 1970 00:00:00 UTC; Secure; SameSite=None`;
-      console.log(`Cookie cleared with domain: ${domain}`);
-
-      // Redirect to login page after logout
-      window.location.replace('/login');
+      if (response.ok) {
+        // Delete client-side cookie
+        document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        window.location.replace('/login');
+      } else {
+        throw new Error('Logout failed');
+      }
     } catch (error) {
       console.error('Error during sign out:', error);
-
-      // Fallback cookie deletion
+      // Fallback deletion
       document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
       window.location.href = '/login';
     } finally {
       setIsLoading(false);
-      console.log('Logout process completed.');
     }
   };
 
