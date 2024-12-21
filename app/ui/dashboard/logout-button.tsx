@@ -14,28 +14,39 @@ export default function LogoutButton() {
 
     try {
       setIsLoading(true);
+      console.log('Starting logout process...');
 
-      const response = await fetch('/api/logout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
+      // Call API to handle logout
+      const response = await fetch('/api/logout', { method: 'POST' });
+      
       if (response.ok) {
-        // Delete client-side cookie
-        document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        console.log('Logout successful, deleting cookies...');
+        
+        // Delete client-side cookies from different paths
+        const paths = ['/', '/dashboard', '/members'];
+        paths.forEach((path) => {
+          document.cookie = `token=; path=${path}; domain=.gym-dashboard-mu.vercel.app; expires=Thu, 01 Jan 1970 00:00:00 UTC; Secure; SameSite=None`;
+          console.log(`Cookie cleared from path: ${path}`);
+        });
+        
+        // Additional cookie deletion with domain
+        document.cookie = `token=; path=/; domain=.gym-dashboard-mu.vercel.app; expires=Thu, 01 Jan 1970 00:00:00 UTC; Secure; SameSite=None`;
+        console.log('Cookie cleared with domain: gym-dashboard-mu.vercel.app');
+
+        // Redirect to login page
         window.location.replace('/login');
       } else {
         throw new Error('Logout failed');
       }
     } catch (error) {
       console.error('Error during sign out:', error);
-      // Fallback deletion
+      
+      // Fallback cookie deletion
       document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
       window.location.href = '/login';
     } finally {
       setIsLoading(false);
+      console.log('Logout process completed.');
     }
   };
 
