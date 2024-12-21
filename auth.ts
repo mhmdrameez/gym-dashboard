@@ -45,10 +45,25 @@ export const { auth, signIn, signOut } = NextAuth({
             return null;
           }
 
+          
+
           // Parse the JSON response
           const result = await response.json();
           const tokenToStore = typeof result === 'object' ? JSON.stringify(result) : String(result);
-          cookieStore.set('token', tokenToStore);
+          
+          // Parse the token data to get expiry
+          const parsedToken = JSON.parse(tokenToStore);
+          const tokenExpiry = new Date(parsedToken.data.access.token_expiry);
+          
+          // Set cookie with expiry and security options
+          cookieStore.set('token', tokenToStore, {
+            expires: tokenExpiry,
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            path: '/',
+            sameSite: 'strict',
+            maxAge: Math.floor((tokenExpiry.getTime() - Date.now()) / 1000) // Convert to seconds
+          });
 
           // Extract user data from the API response
           const { success, data } = result;
